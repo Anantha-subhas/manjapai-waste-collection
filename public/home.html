@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="/css/home.css">
+</head>
+
+<body>
+    <div class="home-container">
+        <a href="/login.html">Logout</a>
+        <main>
+            <h2>pickup now</h2>
+            <button onclick="document.getElementById('pickupForm').scrollIntoView({ behavior: 'smooth' });">schedule a
+                pickup</button>
+        </main>
+        <section>
+            <p>We're on a mission to reduce waste <br>and promote recycling in our community</p>
+            <div class="icons">
+                <div class="icon">
+                    <img src="./images/icons/event.png" alt="">
+                    <p>BOOK <br>Schedule a pickup <br>online</p>
+                </div>
+                <div class="icon">
+                    <img src="images/icons/waste.png" alt="">
+                    <p>COLLECT <br> We collect your <br> recycilables</p>
+                </div>
+                <div class="icon">
+                    <img src="images/icons/recycle-sign.png" alt="">
+                    <p>RECYCLE <br>Your waste is <br> processed</p>
+                </div>
+            </div>
+        </section>
+        <aside>
+            <div class="msg">
+                <img src="images/recycle.png" alt="">
+                <p>Please provide your information to schedule a recyling pickup.
+                    We will collect materials such as paper, plastic, glass, and metal from your location.
+                </p>
+            </div>
+            <form id="pickupForm">
+                <fieldset>
+                    <legend>Contact Information</legend>
+                    <label for="fullname">Full Name</label>
+                    <input type="text" id="fullname" name="fullname" required>
+
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required>
+
+                    <label for="address">Pickup Address</label>
+                    <input type="text" id="address" name="address" required>
+
+                    <label for="city">City</label>
+                    <input type="text" id="city" name="city" required>
+
+                    <label for="pickupDate">Pickup Date</label>
+                    <input type="date" id="pickupDate" name="pickupDate" required>
+
+                    <div class="checkbox">
+                        <input type="checkbox" id="agree" name="agree" required>
+                        <label for="agree">I agree - Are you a user of Manja Pai?</label>
+                    </div>
+                    <button type="submit" id="submitBtn">Submit</button>
+                </fieldset>
+            </form>
+            <div class="error" style="display: none; color: red;"></div>
+            <div class="success" style="display: none; color: green;"></div>
+        </aside>
+    </div>
+    <footer>
+        <div class="contactme">
+            contact me on:
+        </div>
+        <div class="owner-info">
+            <div class="links">
+                <div class="mail">
+                    <img src="./images/icons/mail.png" alt="">
+                    <a href="mailto:manjappaiofficial@gmail.com">Email</a>
+                </div>
+                <div class="instagram">
+                    <img src="./images/icons/instagram.png" alt="">
+                    <a href="https://www.instagram.com/mymanjappai?igsh=MWw3ajJjMHgxbHc5OQ==">Instagram</a>
+                </div>
+                <div class="site">
+                    <img src="./images/icons/globe.png" alt="">
+                    <a href="https://manjappai.store.shoopy.in/">Manjapai Website</a>
+                </div>
+                <div class="whatsapp">
+                    <img src="./images/icons/whatsapp.png" alt="">
+                    <a href="https://wa.me/qr/UR257T46YUAEO1">Whatapp</a>
+                </div>
+            </div>
+        </div>
+        <p>Site Maintained by Anandkumar-manjappaiofficial@gmail.com</p>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const pickupForm = document.getElementById('pickupForm');
+            const errorDiv = document.querySelector('.error');
+            const successDiv = document.querySelector('.success');
+            const submitBtn = document.getElementById('submitBtn');
+
+            // Retrieve user email from localStorage (set during login)
+            const userEmail = localStorage.getItem('userEmail');
+
+            if (pickupForm) {
+                pickupForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    // Disable the button and show loading state
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Submitting...';
+
+                    if (!userEmail) {
+                        errorDiv.style.display = 'block';
+                        errorDiv.textContent = 'Please log in to submit a pickup request.';
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Submit';
+                        return;
+                    }
+
+                    const formData = {
+                        user_email: userEmail,
+                        fullname: document.getElementById('fullname').value,
+                        email: document.getElementById('email').value,
+                        address: document.getElementById('address').value,
+                        city: document.getElementById('city').value,
+                        pickup_date: document.getElementById('pickupDate').value,
+                        agree: document.getElementById('agree').checked,
+                    };
+
+                    try {
+                        const response = await fetch('/api/pickup', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(formData),
+                        });
+
+                        const data = await response.json();
+                        if (response.ok) {
+                            successDiv.style.display = 'block';
+                            successDiv.textContent = 'Pickup request submitted successfully!';
+                            alert("Successfully submitted!");
+                            pickupForm.reset();
+                            setTimeout(() => {
+                                successDiv.style.display = 'none';
+                            }, 3000);
+                        } else {
+                            errorDiv.style.display = 'block';
+                            errorDiv.textContent = data.message;
+                        }
+                    } catch (err) {
+                        errorDiv.style.display = 'block';
+                        errorDiv.textContent = 'An error occurred. Please try again.';
+                    } finally {
+                        // Re-enable the button after the request completes
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Submit';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
